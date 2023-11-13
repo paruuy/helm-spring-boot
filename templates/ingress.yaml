@@ -1,0 +1,35 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- if .Values.ingress.annotations }}
+  annotations:
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    service: "{{ .Values.application.name }}"
+  name: "{{ .Values.application.name }}-ingress"
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+   
+    {{- if .Values.ingress.host.enabled }}
+    - host: "{{ .Values.application.name }}.{{ .Values.ingress.domainSuffix }}"
+      http:
+    {{- else }}
+    - http:
+    {{- end }}
+        paths:
+          - path: {{ .Values.ingress.contextPath }}
+            backend:
+              service:
+                name: "{{ .Values.application.name }}-svc"
+                port:
+                  number: {{ .Values.service.port }}
+            pathType: {{ .Values.ingress.pathType }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - "{{ .Values.application.name }}.{{ .Values.ingress.domainSuffix }}"
+      secretName: {{ .Values.ingress.tls.tlsSecretName }}
+  {{- end }}

@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.application.name }}-deployment"
+  labels:
+    application: "{{ .Values.application.name }}" 
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      application: "{{ .Values.application.name }}" 
+  template:
+    metadata:
+      labels:
+        application: "{{ .Values.application.name }}" 
+    spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+        - name: "{{ .Values.application.name }}" 
+        {{- if not .Values.image.repository }}
+          {{- fail "The 'image.repository' field is not defined. Define the 'repository' field in the values.yaml file." }}
+        {{- end }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: -agentlib:jdwp=transport=dt_socket{{- if .Values.debug.enabled  | default false }},address={{ .Values.debug.port }}{{- end }},server=y,suspend=n -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Dcom.sun.jndi.ldap.object.trustURLCodebase=false -Dlog4j2.formatMsgNoLookups=true
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          {{- if .Values.probes.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readinessProbe.httpGet.path }}
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: {{ .Values.probes.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readinessProbe.timeoutSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: {{ .Values.probes.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.livenessProbe.timeoutSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.probes.startupProbe.httpGet.path }}
+              port: {{ .Values.service.targetPort }}
+            failureThreshold: {{ .Values.probes.startupProbe.failureTreshold }}
+            periodSeconds: {{ .Values.probes.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.startupProbe.timeoutSeconds }}
+          {{- end }}
+          

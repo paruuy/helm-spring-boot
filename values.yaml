@@ -1,0 +1,57 @@
+# values.yaml
+replicaCount: 1
+application:
+  name: test-hello-world
+
+image:
+  # baseLocation: caascop-docker.devops.tech.ec.europa.eu/repository/cop-caas-dsocc/
+  #registry: dsocc-docker.devops.tech.ec.europa.eu/caas-demo/digital-streams/notifications
+  repository: kimb88/hello-world-spring-boot
+  tag: latest
+  #pullSecret: caascop-nexus-registry
+  pullPolicy: Always
+
+debug:
+  enabled: false
+  port: 5005
+  
+service:
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+
+  contextPath: /
+  pathType: Prefix
+  host:
+    enabled: false
+  tls:
+    enabled: false
+    tlsSecretName: ""
+
+probes:
+  enabled: false
+  readinessProbe:
+    httpGet:
+      path: /actuator/health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+  livenessProbe:
+    httpGet:
+      path: /actuator/health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+  startupProbe:
+    httpGet:
+      path: /actuator/health
+    failureTreshold: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    
