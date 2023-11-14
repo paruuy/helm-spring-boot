@@ -4,11 +4,8 @@ application:
   name: test-hello-world
 
 image:
-  # baseLocation: caascop-docker.devops.tech.ec.europa.eu/repository/cop-caas-dsocc/
-  #registry: dsocc-docker.devops.tech.ec.europa.eu/caas-demo/digital-streams/notifications
   repository: kimb88/hello-world-spring-boot
   tag: latest
-  #pullSecret: caascop-nexus-registry
   pullPolicy: Always
 
 debug:
