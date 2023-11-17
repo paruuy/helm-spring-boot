@@ -21,10 +21,15 @@ spec:
       {{- end }}
       containers:
         - name: "{{ .Values.application.name }}" 
-        {{- if not .Values.image.repository }}
-          {{- fail "The 'image.repository' field is not defined. Define the 'repository' field in the values.yaml file." }}
+        {{- if not .Values.image.registry }}
+          {{- fail "The 'image.registry' field is not defined. Define the 'registry' field in the values.yaml file." }}
+        {{- else if not (regexMatch "^.*\\/$" .Values.image.registry) }}
+          {{- fail "The 'image.registry' value must end with a forward slash (/)." }}
         {{- end }}
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        {{- if not .Values.image.repositoryPath }}
+          {{- fail "The 'image.repositoryPath' field is not defined. Define the 'repositoryPath' field in the values.yaml file. For example, if your fully registry URL is 'dsocc-docker.devops.tech.ec.europa.eu/caas-demo/digital-streams/notifications', the repositoryPath should be 'caas-demo/digital-streams/notifications'" }}
+        {{- end }}
+          image: "{{ .Values.image.registry }}{{ .Values.image.repositoryPath }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
           env:
             - name: JAVA_TOOL_OPTIONS

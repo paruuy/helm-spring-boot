@@ -4,7 +4,8 @@ application:
   name: test-hello-world
 
 image:
-  repository: kimb88/hello-world-spring-boot
+  registry: docker.io/ #Needs to have the '/' at the end
+  repositoryPath: kimb88/hello-world-spring-boot
   tag: latest
   pullPolicy: Always
 
