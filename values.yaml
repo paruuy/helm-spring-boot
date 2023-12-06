@@ -3,10 +3,15 @@ replicaCount: 1
 application:
   name: test-hello-world
 
+springPropConfig: 
+  enable: true  # If you dont want to use that feature, change to false the value.
+  applicationPropertiesPath: app-properties/example-application.properties # File stored in app-properties folder
+
 image:
   registry: docker.io/ #Needs to have the '/' at the end
   repositoryPath: kimb88/hello-world-spring-boot
   tag: latest
+  pullSecret: "" # Used in CaaS with the value caascop-nexus-registry (Credentials to be able to download the docker images)
   pullPolicy: Always
 
 debug:
@@ -23,7 +28,6 @@ ingress:
     alb.ingress.kubernetes.io/scheme: internal
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-
   contextPath: /
   pathType: Prefix
   host:
@@ -52,4 +56,20 @@ probes:
     failureTreshold: 30
     periodSeconds: 10
     timeoutSeconds: 5
-    
+
+# Configuration to use Vault 
+externalSecrets:
+  enabled: false # If the value its true the externalSecret manifest will be created
+  secretStoreRefName: eks-secret-store                      # Name of the Vault type (manifest) generated - For caas the name its always 'vault-backend-customer'
+  secretStoreRefKind: SecretStore                           # Vault Type (Default value = SecretStore)
+  secretData:
+    - secretKey: FIELD1                                     # Key Name created in a secret manifest with the name secretName field (below)
+      secretName: "YOUR-APP-NAME-VALUE-external-secrets"    # Name formed by application.name + external-secrets
+      remoteRefKey: caas-external-secrets                   # Path name of the secret manager where the fields declared in 'property' are the keys to be able to get the values 
+      property: field1                                      # Propertie key name 
+      envVarName: ENV_VAR_FIELD1                            # Name of the environment variable to use the value in the application (variable created in deployment.yaml dinamically)
+    - secretKey: FIELD2
+      secretName: "YOUR-APP-NAME-VALUE-external-secrets" #Name generated using {{application.name}}+"-external-secrets"
+      remoteRefKey: caas-external-secrets
+      property: field2
+      envVarName: ENV_VAR_FIELD2

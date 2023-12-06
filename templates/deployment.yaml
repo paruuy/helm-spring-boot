@@ -19,6 +19,14 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
+      volumes:
+        - name: properties
+          {{- if .Values.springPropConfig.enable }}
+          configMap:
+            name: "cm-{{ .Values.application.name }}"
+          {{- else -}}
+          emptyDir: {}
+          {{- end }}
       containers:
         - name: "{{ .Values.application.name }}" 
         {{- if not .Values.image.registry }}
@@ -33,10 +41,30 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: -agentlib:jdwp=transport=dt_socket{{- if .Values.debug.enabled  | default false }},address={{ .Values.debug.port }}{{- end }},server=y,suspend=n -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Dcom.sun.jndi.ldap.object.trustURLCodebase=false -Dlog4j2.formatMsgNoLookups=true
+              value: >-
+                -agentlib:jdwp=transport=dt_socket{{- if .Values.debug.enabled  | default false }},gaddress={{ .Values.debug.port }}{{- end }},server=y,suspend=n,
+                -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts,
+                -Dcom.sun.jndi.ldap.object.trustURLCodebase=false,
+                -Dlog4j2.formatMsgNoLookups=true,
+          {{- if .Values.springPropConfig.enable }}
+            - name: SPRING_CONFIG_LOCATION
+              value: "file:///tmp/config/application.properties"
+          {{- end }}
+          {{- if .Values.externalSecrets.enabled }}
+            {{- range .Values.externalSecrets.secretData }}
+            - name: {{ .envVarName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
+          volumeMounts:
+            - name: properties
+              mountPath: "/tmp/config"
           {{- if .Values.probes.enabled }}
           readinessProbe:
             httpGet:

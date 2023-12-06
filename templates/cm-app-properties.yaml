@@ -1,0 +1,9 @@
+{{- if .Values.springPropConfig.enable }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-{{ .Values.application.name }}
+data:
+  application.properties: |+
+    {{ .Files.Get .Values.springPropConfig.applicationPropertiesPath | nindent 4 }}
+{{- end }}
