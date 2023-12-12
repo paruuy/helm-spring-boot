@@ -12,6 +12,11 @@ spec:
       application: "{{ .Values.application.name }}" 
   template:
     metadata:
+      annotations:
+        {{- if .Values.springPropConfig.enable }}
+        checksum/config: {{ include (print $.Template.BasePath "/cm-app-properties.yaml") . | sha256sum }}
+        {{- end }}
+        application: "{{ .Values.application.name }}" 
       labels:
         application: "{{ .Values.application.name }}" 
     spec:
