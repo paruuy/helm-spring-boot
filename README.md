@@ -10,8 +10,6 @@ This Helm chart is designed to deploy a Spring Boot application on Kubernetes. I
   - [Deployment](#deployment)
   - [ConfigMap](#configmap)
   - [ExternalSecret](#externalsecret)
-- [Customizable Values](#customizable-values)
-
 ---
 
 ## Manifests
