@@ -1,6 +1,6 @@
 # Helm Chart for Spring Boot Application
 
-This Helm chart is designed to deploy a Spring Boot application on Kubernetes. It includes manifests for Ingress, Service, and Deployment, allowing you to easily manage and deploy your Spring Boot application.
+This Helm chart is designed to deploy a Spring Boot application on Kubernetes. It includes manifests for Ingress, Service, Deployment, ConfigMap (used to generate application.propertie file), ExternalSecret, PersistenVolume and PersistentVolumeC, allowing you to easily manage and deploy your Spring Boot application.
 
 ## Table of Contents
 
@@ -10,6 +10,7 @@ This Helm chart is designed to deploy a Spring Boot application on Kubernetes. I
   - [Deployment](#deployment)
   - [ConfigMap](#configmap)
   - [ExternalSecret](#externalsecret)
+- [Extra environment variables](#extraenvironmentvariables)
 ---
 
 ## Manifests
@@ -85,3 +86,19 @@ Customize the following in the External Secret YAML:
 
   - `externalSecrets.secretData.envVarName`: The name of the environment variable to be created dynamically in the deployment.yaml, allowing the application to use the secret value.
 
+
+
+## Extra environment variables
+
+If necessary, this Helm chart provides the flexibility to incorporate additional environment variables for consumption in your application. Simply include the following configuration in the values.yaml file:
+
+```yaml
+# my-values.yaml
+environmentVariables:
+  - name: VAR1
+    value: "custom_value1"
+  - name: VAR3
+    value: "new_variable"
+```
+
+This code dynamically generates environment variables within the deployment.yaml manifest, and once the deployment process is complete, you'll find these variables accessible within the pod.

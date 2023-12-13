@@ -5,6 +5,9 @@ metadata:
   name: "{{ .Values.application.name }}-deployment"
   labels:
     application: "{{ .Values.application.name }}" 
+  {{- with .Values.labels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -45,6 +48,10 @@ spec:
           image: "{{ .Values.image.registry }}{{ .Values.image.repositoryPath }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
           env:
+            {{- range .Values.environmentVariables }}
+            - name: {{ .name }}
+              value: {{ .value | default "" }}
+            {{- end }}
             - name: JAVA_TOOL_OPTIONS
               value: >-
                 -agentlib:jdwp=transport=dt_socket{{- if .Values.debug.enabled  | default false }},gaddress={{ .Values.debug.port }}{{- end }},server=y,suspend=n,

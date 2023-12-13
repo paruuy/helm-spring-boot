@@ -73,3 +73,8 @@ externalSecrets:
       remoteRefKey: caas-external-secrets
       property: field2
       envVarName: ENV_VAR_FIELD2
+
+# Example of how to generate extra environment variables
+environmentVariables:
+  - name: VAR1
+    value: "custom_value1"
